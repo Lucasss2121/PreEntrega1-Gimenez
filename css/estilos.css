@@ -1,0 +1,66 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}  
+
+body{
+    background-color: #212529;
+}
+
+h1{
+    display: flex;
+    justify-content: center;
+    color: white;
+    padding-top: 20px;
+    padding-bottom: 30PX;
+    background-color: #333333;
+    border-bottom: 1px solid rgb(87, 17, 17);
+}
+
+#cards{
+    display: flex;
+    justify-content: space-around;
+    padding: 25px;
+}
+
+#agregarCarrito{
+    display: flex;
+    justify-content: flex-end;
+    align-items: end;
+    flex-direction: column;
+    margin: 30px 30px;
+    gap: 25px;
+}
+
+.card{
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 20px 20px;
+    height: 310px;
+    width: 250px;
+    background-color: rgb(255, 255, 255);
+}
+
+.card h3,p{
+    margin-top: 0px;
+}
+
+img{
+    max-width: 100%;
+    background-color: rgb(255, 255, 255);
+}
+
+#precioFinal{
+    text-align: end;
+    margin-right: 50px;
+    color: white;
+}
+
+button{
+    background-color: red;
+    color: white;
+    padding: 5px 10px;
+    border: 2px solid black;
+    margin-top: 5px;
+}
