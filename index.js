@@ -1,81 +1,117 @@
-const PRODUCTOS = [
-    {id:1, nombre: "ZOMBIE HANDS T-SHIRT", precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/products/BMTH_ZombieHandsTee.png?v=1668702843&width=500"},
-    {id:2, nombre: "GLOBE WHITE T-SHIRT", precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/products/GlobeWhiteFront.png?v=1641317209&width=500"},
-    {id:3, nombre: "BARBED WIRED T-SHIRT", precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/products/BarbedHexWhiteFront.png?v=1641313796&width=500"},
-    {id:4, nombre: "KOOL AID HOODIE" , precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/files/BMTH---Koolaid-text-black-Hoodie-Front.png?v=1704379094&width=500"}
-];
+// const PRODUCTOS = [
+//     {id:1, nombre: "ZOMBIE HANDS T-SHIRT", precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/products/BMTH_ZombieHandsTee.png?v=1668702843&width=500"},
+//     {id:2, nombre: "GLOBE WHITE T-SHIRT", precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/products/GlobeWhiteFront.png?v=1641317209&width=500"},
+//     {id:3, nombre: "BARBED WIRED T-SHIRT", precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/products/BarbedHexWhiteFront.png?v=1641313796&width=500"},
+//     {id:4, nombre: "KOOL AID HOODIE" , precio: 25980, image: "https://shop.bmthofficial.com/cdn/shop/files/BMTH---Koolaid-text-black-Hoodie-Front.png?v=1704379094&width=500"}
+// ];
 
-let CARRITO = [];
+let carrito = [];
 
 function cargarCarritoLocalStorage() {
-    const carritoGuardado = localStorage.getItem('carrito');
-    if (carritoGuardado) {
-        CARRITO = JSON.parse(carritoGuardado);
-        actualizarCarrito();
-    }
+    const CARRITO_GUARDADO = localStorage.getItem('carrito');
+    carrito = CARRITO_GUARDADO ? JSON.parse(CARRITO_GUARDADO) : [];
+    actualizarCarrito();
 }
 
 function guardarCarritoLocalStorage() {
-    localStorage.setItem('carrito', JSON.stringify(CARRITO));
+    localStorage.setItem('carrito', JSON.stringify(carrito));
 }
 
 function mostrarProductos(){
-    const contenedorProducto = document.getElementById("cards");
-    contenedorProducto.innerHTML = "";
-
-    PRODUCTOS.forEach(producto => {
-        const cardProductos = document.createElement("div");
-        cardProductos.classList.add("card");
-        cardProductos.innerHTML = `
-                    <img src="${producto.image}" alt="${producto.image}">
-                    <h5>${producto.nombre}</h5>
-                    <p>$${producto.precio.toFixed(2)}</p>
-                    <button onclick ="agregarAlCarrito(${producto.id})">Agregar al carrito</button
-        `;
-        contenedorProducto.appendChild(cardProductos);
-    });
-
-    cargarCarritoLocalStorage();
+    fetch('productos.json')
+        .then(respuesta => respuesta.json())
+        .then(dato => {
+            const CONTENEDOR_PRODUCTO = document.getElementById("cards");
+            CONTENEDOR_PRODUCTO.innerHTML = "";
+        
+            dato.forEach(({ id, nombre, precio, image }) => {
+                const CARD_PRODUCTOS = document.createElement("div");
+                CARD_PRODUCTOS.classList.add("card");
+                CARD_PRODUCTOS.innerHTML = `
+                    <img src="${image}" alt="${image}">
+                    <h5>${nombre}</h5>
+                    <p>$${precio.toFixed(2)}</p>
+                    <button onclick="agregarAlCarrito(${id})">Agregar al carrito</button>
+                `;
+                CONTENEDOR_PRODUCTO.appendChild(CARD_PRODUCTOS);
+            });
+            
+            cargarCarritoLocalStorage();
+        })
+        .catch(error => console.log(error));
 }   
 
 function agregarAlCarrito(idProducto)  {
-    const productoSeleccionado = PRODUCTOS.find(producto => producto.id === idProducto);
+    fetch('productos.json')
+        .then(respuesta => respuesta.json())
+        .then(dato => {
+            const PRODUCTO_SELECCIONADO = dato.find(({id}) => id === idProducto);
+        
+            if(PRODUCTO_SELECCIONADO){
+                carrito.push(PRODUCTO_SELECCIONADO);
+                actualizarCarrito();
+                guardarCarritoLocalStorage();
+        
+                Toastify({
+                    text: `${PRODUCTO_SELECCIONADO.nombre} se agrego al carrito`,
+                    duration: 950,
+                    gravity: "top",
+                    position: "right",
+                    // backgroundColor: "#FF0000",
+                    backgroundColor: "linear-gradient(to right, #FF5858, #FF4242)",
+                    style: {
+                        filter: "brightness(80%)",
+                    }
+                }).showToast();
+            }
 
-    if(productoSeleccionado){
-        CARRITO.push(productoSeleccionado);
-        actualizarCarrito();
-        guardarCarritoLocalStorage();
-    }
+        })
+        .catch(error => console.log(error));
 }
 
 function eliminarDelCarrito(idProducto) {
-    CARRITO = CARRITO.filter(producto => producto.id !== idProducto);
-    actualizarCarrito();
-    guardarCarritoLocalStorage();
+    const INDEX = carrito.findIndex(({id}) => id === idProducto);
+    if (INDEX !== -1) {
+        const PRODUCTO_ELIMINADO = carrito.splice(INDEX, 1)[0];
+        actualizarCarrito();
+        guardarCarritoLocalStorage();
+
+        Toastify({
+            text: `Se elimino ${PRODUCTO_ELIMINADO .nombre}`,
+            duration: 950,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "linear-gradient(to right, #D9534F, #C9302C)",
+            style: {
+                filter: "brightness(100%)",
+            }
+        }).showToast();
+
+    }
 }
 
 function actualizarCarrito(){
-    const contenidoCarrito = document.getElementById("agregarCarrito");
-    contenidoCarrito.innerHTML = "";
+    const CONTENIDO_CARRITO = document.getElementById("agregarCarrito");
+    CONTENIDO_CARRITO.innerHTML = "";
 
-    CARRITO.forEach(producto =>{
-        const cardCarrito = document.createElement("div");
-        cardCarrito.classList.add("card");
-        cardCarrito.innerHTML = `
-                    <img src="${producto.image}" alt="${producto.image}">
-                    <h4>${producto.nombre}</h4>
-                    <p>$${producto.precio.toFixed(2)}</p>
-                    <button onclick="eliminarDelCarrito(${producto.id})">Eliminar</button>
+    carrito.forEach(({id, nombre, precio, image}) => {
+        const CARD_CARRITO = document.createElement("div");
+        CARD_CARRITO.classList.add("card");
+        CARD_CARRITO.innerHTML = `
+                    <img src="${image}" alt="${image}">
+                    <h4>${nombre}</h4>
+                    <p>$${precio.toFixed(2)}</p>
+                    <button onclick="eliminarDelCarrito(${id})">Eliminar</button>
         `;
-        contenidoCarrito.appendChild(cardCarrito);
+        CONTENIDO_CARRITO.appendChild(CARD_CARRITO);
     })
     sumarPrecio();
 }
 
 function sumarPrecio(){
-    const totalElement = document.getElementById("precioFinal");
-    const total = CARRITO.reduce((acc, producto) => acc+ producto.precio,0)
-    totalElement.innerHTML = `<p> total: $${total}`;
+    const TOTAL_ELEMENT = document.getElementById("precioFinal");
+    const TOTAL = carrito.reduce((acc, {precio}) => acc+ precio, 0)
+    TOTAL_ELEMENT.innerHTML = `<p> total: $${TOTAL.toFixed(2)}`;
 }
 
 mostrarProductos()
